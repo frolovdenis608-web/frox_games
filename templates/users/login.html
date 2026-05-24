@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Вхід — FroxGameS{% endblock %}
+
+{% block content %}
+<div style="background: #222; margin: 5% auto; padding: 30px; width: 400px; border-radius: 10px; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
+    <h2 style="text-align: center; margin-bottom: 20px;">Вхід до аккаунту</h2>
+    
+    <form method="POST" action="{% url 'users:login' %}">
+        {% csrf_token %}
+        
+        {% if form.errors %}
+            <p style="color: #dc3545; background: rgba(220, 53, 69, 0.1); padding: 10px; border-radius: 4px; font-size: 14px;">
+                Невірний логін або пароль. Спробуйте ще раз.
+            </p>
+        {% endif %}
+
+        <div style="margin-bottom: 15px;">
+            <label for="id_username" style="display:block; margin-bottom: 5px; color: #aaa;">Логін:</label>
+            <input type="text" name="username" id="id_username" required style="width: 100%; box-sizing: border-box; background: #333; color: white; border: 1px solid #444; padding: 10px;">
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label for="id_password" style="display:block; margin-bottom: 5px; color: #aaa;">Пароль:</label>
+            <input type="password" name="password" id="id_password" required style="width: 100%; box-sizing: border-box; background: #333; color: white; border: 1px solid #444; padding: 10px;">
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 16px;">Увійти</button>
+    </form>
+    
+    <p style="text-align: center; margin-top: 15px; font-size: 14px; color: #aaa;">
+        Немає аккаунту? <a href="{% url 'users:register' %}" style="color: #28a745; text-decoration: none;">Зареєструватися</a>
+    </p>
+</div>
+{% endblock %}

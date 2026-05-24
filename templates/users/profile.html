@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+
+{% block title %}Особистий кабінет — FroxGameS{% endblock %}
+
+{% block content %}
+<div style="width: 100%; display: flex; gap: 30px;">
+    <div style="flex: 1; background: #222; padding: 30px; border-radius: 10px;">
+        <h2 style="text-align: center; margin-top: 0;">{% if is_admin %}Панель Адміна{% else %}Моя сторінка{% endif %}</h2>
+        {% if messages %}
+            {% for message in messages %}
+                <div style="padding: 12px; margin-bottom: 20px; border-radius: 4px; background: rgba(40, 167, 69, 0.2); color: #28a745; border: 1px solid #28a745;">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        <div style="text-align: center; margin: 20px 0;">
+            <div style="width: 100px; height: 100px; border-radius: 50%; margin: 0 auto; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #333; border: 2px solid #555;">
+
+                {% if user.avatar %}
+                    <img src="{{ user.avatar.url }}" alt="Аватар" style="width: 100%; height: 100%; object-fit: cover;">
+                {% else %}
+                    <span style="font-size: 40px; color: white;">{{ user.username|make_list|first|upper }}</span>
+                {% endif %}
+
+            </div>
+        </div>
+        <p><strong>Логін:</strong> {{ user.username }}</p>
+        <p><strong>Роль:</strong> {% if is_admin %}<span style="color: #dc3545; font-weight: bold;">Адміністратор</span>{% else %}Покупець{% endif %}</p>
+
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px; border-top: 1px solid #444; padding-top: 15px;">
+            <a href="{% url 'users:profile_edit' %}" class="btn btn-dark" style="text-align: center; background: #333; border: 1px solid #444;">Налаштування профілю</a>
+            <a href="{% url 'users:password_change' %}" class="btn btn-dark" style="text-align: center; background: #333; border: 1px solid #444;">Змінити пароль</a>
+        </div>
+
+        {% if is_admin %}
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 25px;">
+                <a href="{% url 'games:game_create' %}" class="btn btn-success" style="text-align: center;">+ Додати гру</a>
+                <a href="{% url 'games:genre_create' %}" class="btn btn-primary" style="text-align: center;">+ Додати жанр</a>
+                <a href="{% url 'discounts:promocode_create' %}" class="btn btn-info" style="text-align: center; background: #6f42c1; border-color: #6f42c1; color: white;">+ Створити промокод</a>
+            </div>
+
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                <h3 style="width: 100% ;margin-top: 30px; margin-bottom: 15px; font-size: 18px; border-bottom: 1px solid #444; padding-bottom: 10px;">Існуючі жанри</h3>
+                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                    {% for genre in genres %}
+                        <span style="background: #333; padding: 6px 12px; border-radius: 20px; font-size: 13px; border: 1px solid #555; color: #ddd; display: flex; align-items: center; gap: 8px;">
+                            {{ genre.name }}
+                            <a href="{% url 'games:genre_delete' genre.id %}" style="color: #ff6b6b; text-decoration: none; font-weight: bold; font-size: 14px; line-height: 1;" title="Видалити жанр">&times;</a>
+                        </span>
+                    {% empty %}
+                        <p style="color: #aaa; margin: 0; font-size: 14px;">Жанрів не створено.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <h3 style="margin-top: 25px; margin-bottom: 15px; font-size: 18px; border-bottom: 1px solid #444; padding-bottom: 10px;">Існуючі промокоди</h3>
+            <div style="display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; padding-right: 5px;">
+                {% for promo in promocodes %}
+                    <div style="background: #333; padding: 8px 12px; border-radius: 6px; font-size: 13px; border: 1px solid #555; color: #ddd; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong style="color: white; font-size: 14px;">{{ promo.code }}</strong>
+                            <span style="display: block; font-size: 11px; color: {% if promo.is_valid %}#28a745{% else %}#dc3545{% endif %};">
+                                {% if promo.discount_type == 'PERCENT' %}-{{ promo.value }}%{% else %}-{{ promo.value }} грн{% endif %}
+                            </span>
+                        </div>
+                        <a href="{% url 'discounts:promocode_delete' promo.id %}" style="color: #ff6b6b; text-decoration: none; font-weight: bold; font-size: 16px; line-height: 1;" title="Видалити промокод">&times;</a>
+                    </div>
+                {% empty %}
+                    <p style="color: #aaa; margin: 0; font-size: 14px;">Промокодів не створено.</p>
+                {% endfor %}
+            </div>
+
+        {% else %}
+            <a href="{% url 'wishlist:wishlist_detail' %}" class="btn btn-dark" style="width: 100%; text-align: center; box-sizing: border-box; margin-top: 20px;">Мій список бажаного</a>
+        {% endif %}
+    </div>
+
+    <div style="flex: 4; background: #222; padding: 30px; border-radius: 10px;">
+        {% if is_admin %}
+            <h2 style="margin-top: 0;">Управління каталогом ігор</h2>
+            <hr style="border-color: #444; margin-bottom: 20px;">
+
+            <div style="max-height: calc(100vh - 100px); overflow-y: auto; padding-right: 10px;">
+                <form method="GET" style="display: flex; gap: 10px; margin-bottom: 20px; background: #333; padding: 15px; border-radius: 8px;">
+                    <input type="text" name="search" placeholder="Пошук за назвою..." value="{{ search_query }}"
+                           style="background: #222; color: white; padding: 8px; border: 1px solid #555; flex: 2; border-radius: 4px;">
+
+                    <select name="genre" style="background: #222; color: white; padding: 8px; border: 1px solid #555; flex: 1; border-radius: 4px;">
+                        <option value="">Всі жанри</option>
+                        {% for genre in genres %}
+                            <option value="{{ genre.name }}" {% if genre.name == current_genre %}selected{% endif %}>
+                                {{ genre.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+
+                    <button type="submit" class="btn btn-primary">Фільтрувати</button>
+                    <a href="{% url 'users:profile' %}" class="btn btn-dark">Скинути</a>
+                </form>
+
+                {% if games %}
+                    <h3 style="color: #28a745; margin-top: 0; font-size: 16px;">▶ Активні ігри (У продажу)</h3>
+                    {% for game in games %}
+                        {% if game.is_active %}
+                            <div style="display: flex; justify-content: space-between; align-items: center; background: #333; padding: 12px 20px; border-radius: 6px; margin-bottom: 10px;">
+                                <div style="display: flex; align-items: center; gap: 15px;">
+                                    {% if game.cover_image %}
+                                        <img src="{{ game.cover_image.url }}" style="width: 40px; height: 50px; object-fit: cover; border-radius: 4px;">
+                                    {% endif %}
+                                    <div>
+                                        <strong style="font-size: 16px;">{{ game.title }}</strong>
+                                        <span style="display:block; color: #28a745; font-size: 14px;">{{ game.price }} грн.</span>
+                                    </div>
+                                </div>
+                                <div style="display: flex; gap: 10px;">
+                                    <a href="{% url 'games:game_edit' game.id %}" class="btn btn-info" style="padding: 6px 15px;">Редагувати</a>
+                                    <a href="{% url 'games:game_delete' game.id %}" class="btn btn-danger" style="padding: 6px 15px;">Видалити</a>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+
+                    <h3 style="color: #aaa; margin-top: 30px; font-size: 16px;">⏸ Неактивні ігри (Приховані з каталогу)</h3>
+                    {% for game in games %}
+                        {% if not game.is_active %}
+                            <div style="display: flex; justify-content: space-between; align-items: center; background: #2a2a2a; padding: 12px 20px; border-radius: 6px; margin-bottom: 10px; border: 1px dashed #555; opacity: 0.8;">
+                                <div style="display: flex; align-items: center; gap: 15px;">
+                                    {% if game.cover_image %}
+                                        <img src="{{ game.cover_image.url }}" style="width: 40px; height: 50px; object-fit: cover; border-radius: 4px; filter: grayscale(100%);">
+                                    {% endif %}
+                                    <div>
+                                        <strong style="font-size: 16px; color: #aaa;">
+                                            {{ game.title }}
+                                            <span style="background: #dc3545; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-left: 5px; vertical-align: middle;">Приховано</span>
+                                        </strong>
+                                        <span style="display:block; color: #777; font-size: 14px;">{{ game.price }} грн.</span>
+                                    </div>
+                                </div>
+                                <div style="display: flex; gap: 10px;">
+                                    <a href="{% url 'games:game_edit' game.id %}" class="btn btn-info" style="padding: 6px 15px;">Редагувати</a>
+                                    <a href="{% url 'games:game_delete' game.id %}" class="btn btn-danger" style="padding: 6px 15px;">Видалити</a>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <p style="color: #aaa;">У базі даних немає ігор.</p>
+                {% endif %}
+            </div>
+
+        {% else %}
+            <h2 style="margin-top: 0;">Історія замовлень</h2>
+            <hr style="border-color: #444; margin-bottom: 20px;">
+            {% for order in orders %}
+                <div style="background: #333; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #444; padding-bottom: 10px; margin-bottom: 10px;">
+                        <strong style="font-size: 18px;">Замовлення #{{ order.id }}</strong>
+                        <span style="color: #aaa;">{{ order.created_at|date:"d.m.Y H:i" }}</span>
+                    </div>
+
+                    <p>Статус:
+                        {% if order.status == 'PENDING' %}<span style="color: #ffc107;">Очікує оплати</span>
+                        {% elif order.status == 'COMPLETED' %}<span style="color: #28a745;">Виконано</span>
+                        {% else %}{{ order.get_status_display }}{% endif %}
+                    </p>
+
+                    <div style="margin-top: 15px;">
+                        {% for item in order.items.all %}
+                            <div style="display: flex; justify-content: space-between; align-items: center; background: #2a2a2a; padding: 12px 15px; border-radius: 6px; margin-bottom: 8px; border-left: 4px solid {% if order.status == 'COMPLETED' %}#28a745{% else %}#ffc107{% endif %};">
+
+                                <div style="display: flex; align-items: center; gap: 15px;">
+                                    {% if item.game.cover_image %}
+                                        <img src="{{ item.game.cover_image.url }}" style="width: 35px; height: 45px; object-fit: cover; border-radius: 4px;">
+                                    {% endif %}
+                                    <div>
+                                        <strong style="color: white; font-size: 15px;">{{ item.game.title }}</strong>
+                                        <span style="display: block; color: #aaa; font-size: 13px;">{{ item.price }} грн.</span>
+                                    </div>
+                                </div>
+
+                                {% if order.status == 'COMPLETED' %}
+                                    <div style="background: #111; color: #28a745; border: 1px solid #333; padding: 6px 12px; border-radius: 4px; font-family: monospace; font-size: 15px; letter-spacing: 1px; box-shadow: inset 0 0 5px rgba(0,0,0,0.5);" title="Ваш ключ активації">
+                                        {{ item.license_key|default:"Ключ обробляється..." }}
+                                    </div>
+                                {% else %}
+                                    <span style="color: #777; font-size: 13px; background: #222; padding: 6px 12px; border-radius: 4px;">
+                                        🔒 Очікує оплати
+                                    </span>
+                                {% endif %}
+
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <h4 style="text-align: right; margin: 0; color: #28a745;">Сума: {{ order.total_price }} грн.</h4>
+
+                    {% if order.status == 'PENDING' %}
+                        <div style="text-align: right; margin-top: 15px;">
+                            <a href="{% url 'payments:process_payment' order.id %}" class="btn btn-success">Сплатити зараз</a>
+                        </div>
+                    {% endif %}
+                </div>
+            {% empty %}
+                <p style="color: #aaa;">Ви ще не робили замовлень.</p>
+            {% endfor %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} — FroxGameS{% endblock %}
+
+{% block content %}
+<div style="background: #222; margin: 3% auto; padding: 30px; width: 500px; border-radius: 10px; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
+    <h2 style="text-align: center; margin-bottom: 20px;">{{ title }}</h2>
+    
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        {% if form.errors %}
+            <div style="color: #dc3545; background: rgba(220, 53, 69, 0.1); padding: 10px; border-radius: 4px; font-size: 14px; margin-bottom: 15px;">
+                Будь ласка, виправте помилки нижче.
+            </div>
+        {% endif %}
+
+        {% for field in form %}
+            <div style="margin-bottom: 15px;">
+                <label style="display:block; margin-bottom: 5px; color: #aaa;">{{ field.label }}:</label>
+
+                {% if field.name == 'cover_image' and form.instance.pk and form.instance.cover_image %}
+                    <div style="margin-bottom: 10px;">
+                        <img src="{{ form.instance.cover_image.url }}" alt="Поточна обкладинка" style="width: 100px; height: auto; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">
+                        <p style="color: #aaa; font-size: 12px; margin-top: 5px;">Поточна обкладинка</p>
+                    </div>
+                {% endif %}
+
+                {{ field }}
+
+                {% for error in field.errors %}
+                    <span style="color: #dc3545; font-size: 12px;">{{ error }}</span>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button type="submit" class="btn btn-success" style="flex: 1; padding: 12px;">Зберегти</button>
+            <a href="{% url 'users:profile' %}" class="btn btn-danger" style="flex: 1; padding: 12px; text-align: center; box-sizing: border-box;">Скасувати</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

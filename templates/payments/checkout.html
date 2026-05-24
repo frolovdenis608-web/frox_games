@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="background: #222; margin: 5% auto; padding: 30px; width: 500px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); text-align: center;">
+    <h2>Оплата замовлення #{{ order.id }}</h2>
+    <p>Сума до сплати: <strong style="font-size: 24px; color: #28a745;">{{ order.total_price }} грн.</strong></p>
+    
+    <div style="background: #333; padding: 15px; border-radius: 8px; text-align: left; margin: 20px 0;">
+        <h4 style="margin-top: 0;">В замовленні:</h4>
+        <ul style="color: #ddd;">
+            {% for item in order.items.all %}
+                <li>{{ item.game.title }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <form method="POST">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-success" style="width: 100%; padding: 15px; font-size: 18px;">Оплатити (Тестовий платіж)</button>
+    </form>
+</div>
+{% endblock %}

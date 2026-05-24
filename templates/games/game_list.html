@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}Каталог ігор — FroxGameS{% endblock %}
+
+{% block content %}
+<aside class="filters" style="flex: 1; min-width: 240px; margin-right: 30px; background: #222; padding: 20px; border-radius: 10px; height: fit-content; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+    <h3 style="margin-top: 0; border-bottom: 1px solid #444; padding-bottom: 10px;">Фільтри</h3>
+
+    <form method="GET" action="{% url 'games:game_list' %}">
+        {% if request.GET.search %}
+            <input type="hidden" name="search" value="{{ request.GET.search }}">
+        {% endif %}
+
+        <div style="margin-bottom: 25px;">
+            <h4 style="color: #aaa; margin-bottom: 12px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Жанри</h4>
+            <div style="display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; padding-right: 5px;">
+                {% for genre in genres %}
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 15px;">
+                        <input type="checkbox" name="genre" value="{{ genre.slug }}"
+                               {% if genre.slug in selected_genres %}checked{% endif %}
+                               style="accent-color: #007bff; width: 16px; height: 16px;">
+                        {{ genre.name }}
+                    </label>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div style="margin-bottom: 25px;">
+            <h4 style="color: #aaa; margin-bottom: 12px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Віковий рейтинг</h4>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                {% for age in age_choices %}
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 15px;">
+                        <input type="checkbox" name="age_rating" value="{{ age }}"
+                               {% if age in selected_ages %}checked{% endif %}
+                               style="accent-color: #28a745; width: 16px; height: 16px;">
+                        {{ age }}
+                    </label>
+                {% endfor %}
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 10px; font-weight: bold;">Застосувати фільтри</button>
+        <a href="{% url 'games:game_list' %}" style="display: block; text-align: center; margin-top: 10px; color: #888; text-decoration: none; font-size: 13px;">Скинути все</a>
+    </form>
+</aside>
+
+<div style="flex: 3;"> <section id="gameCatalog" class="catalog">
+        {% for game in games %}
+            <div class="game-card" style="position: relative;">
+                <span style="position: absolute; top: 25px; left: 25px; background: {% if game.age_rating == '18+' %}#dc3545{% elif game.age_rating == '16+' %}#fd7e14{% else %}#28a745{% endif %}; color: white; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.5); z-index: 10;">
+                    {{ game.age_rating }}
+                </span>
+
+                {% if game.cover_image %}
+                    <img src="{{ game.cover_image.url }}" alt="{{ game.title }}">
+                {% else %}
+                    <img src="https://via.placeholder.com/300x400/444/fff?text=No+Image" alt="Немає фото">
+                {% endif %}
+
+                <div>
+                    <a href="{% url 'games:game_detail' game.slug %}" style="color:white; text-decoration:none;">
+                        <h4 style="margin: 10px 0 5px 0;">
+                                {{ game.title }}
+                        </h4>
+
+                        <p style="margin: 0 0 10px 0; font-size: 12px; color: #777;">
+                            {% for genre in game.genres.all %}
+                                {{ genre.name }}{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </p>
+
+                        <div style="margin-bottom: 15px;">
+                            {% if game.discount_percent > 0 %}
+                                <span class="old-price" style="text-decoration: line-through; color: #888; font-size: 14px; margin-right: 8px;">{{ game.price }} грн.</span>
+                                <span class="new-price" style="color: #28a745; font-size: 18px; font-weight: bold;">{{ game.get_discounted_price }} грн.</span>
+                                <span class="discount-badge" style="background: #dc3545; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 12px; margin-left: 5px;">-{{ game.discount_percent }}%</span>
+                            {% else %}
+                                <span style="font-size: 16px; font-weight: bold;">{{ game.price }} грн.</span>
+                            {% endif %}
+                        </div>
+                    </a>
+                </div>
+                {% if user.is_authenticated and user.is_staff %}
+                    <div style="display: flex; gap: 5px; margin-top: auto; width: 100%;">
+                        <a href="{% url 'games:game_edit' game.id %}" class="btn btn-info" style="flex: 1; text-align: center; padding: 8px 5px; font-size: 13px; box-sizing: border-box;">Редагувати</a>
+                        <a href="{% url 'games:game_delete' game.id %}" class="btn btn-danger" style="flex: 1; text-align: center; padding: 8px 5px; font-size: 13px; box-sizing: border-box;">Видалити</a>
+                    </div>
+                {% else %}
+                    <a href="{% url 'orders:cart_add' game.id %}" class="btn btn-primary" style="margin-top: auto; display: block; text-align: center; width: 100%; box-sizing: border-box;">У кошик</a>
+                {% endif %}
+            </div>
+        {% empty %}
+            <div style="grid-column: 1 / -1; text-align: center; padding: 50px;">
+                <h3>За вашими критеріями фільтрації ігор не знайдено.</h3>
+            </div>
+        {% endfor %}
+    </section>
+
+    {% if is_paginated %}
+        <div style="display: flex; justify-content: center; gap: 8px; margin-top: 40px;">
+            {% if page_obj.has_previous %}
+                <a href="?page=1{% if query_string %}&{{ query_string }}{% endif %}" class="btn btn-dark" style="padding: 10px 15px;">&laquo; Перша</a>
+                <a href="?page={{ page_obj.previous_page_number }}{% if query_string %}&{{ query_string }}{% endif %}" class="btn btn-dark" style="padding: 10px 15px;">Попередня</a>
+            {% endif %}
+
+            <span class="btn btn-primary" style="cursor: default; padding: 10px 15px; font-weight: bold;">
+                Сторінка {{ page_obj.number }} з {{ page_obj.paginator.num_pages }}
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if query_string %}&{{ query_string }}{% endif %}" class="btn btn-dark" style="padding: 10px 15px;">Наступна</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}{% if query_string %}&{{ query_string }}{% endif %}" class="btn btn-dark" style="padding: 10px 15px;">Остання &raquo;</a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

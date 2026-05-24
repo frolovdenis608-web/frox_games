@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Редагування профілю — FroxGameS{% endblock %}
+
+{% block content %}
+<div style="background: #222; margin: 3% auto; padding: 30px; width: 500px; border-radius: 10px; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
+    <h2 style="text-align: center; margin-bottom: 20px;">Редагування профілю</h2>
+    
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        {% for field in form %}
+            <div style="margin-bottom: 15px;">
+                <label style="display:block; margin-bottom: 5px; color: #aaa;">{{ field.label }}:</label>
+                {{ field }}
+                {% for error in field.errors %}
+                    <span style="color: #dc3545; font-size: 13px; display: block; margin-top: 5px;">{{ error }}</span>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        <div style="display: flex; gap: 10px; margin-top: 25px;">
+            <button type="submit" class="btn btn-success" style="flex: 1; padding: 12px; font-weight: bold;">Зберегти зміни</button>
+            <a href="{% url 'users:profile' %}" class="btn btn-danger" style="flex: 1; padding: 12px; text-align: center; box-sizing: border-box;">Скасувати</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="background: #222; margin: 5% auto; padding: 40px; width: 500px; border-radius: 10px; text-align: center;">
+    <div style="width: 80px; height: 80px; background: #28a745; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+        <span style="color: white; font-size: 40px;">✓</span>
+    </div>
+    <h2>Оплата успішна!</h2>
+    <p style="color: #aaa; margin-bottom: 30px;">Дякуємо за покупку. Ваші ліцензійні ключі скоро будуть доступні в особистому кабінеті.</p>
+    <a href="{% url 'users:profile' %}" class="btn btn-primary" style="margin-right: 10px;">Перейти до кабінету</a>
+    <a href="{% url 'games:game_list' %}" class="btn btn-dark">Повернутись до магазину</a>
+</div>
+{% endblock %}

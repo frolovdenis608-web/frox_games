@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Видалення гри — FroxGameS{% endblock %}
+
+{% block content %}
+<div style="background: #222; margin: 5% auto; padding: 30px; width: 500px; border-radius: 10px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
+    <div style="width: 80px; height: 80px; background: rgba(220, 53, 69, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+        <span style="color: #dc3545; font-size: 40px;">⚠️</span>
+    </div>
+    
+    <h2 style="color: white; margin-top: 0;">Підтвердження видалення</h2>
+    <p style="color: #ddd; font-size: 16px;">Ви дійсно бажаєте назавжди видалити гру <strong>«{{ game.title }}»</strong>?</p>
+    <p style="color: #dc3545; font-size: 14px;">Цю дію неможливо буде скасувати.</p>
+
+    <form method="POST" style="margin-top: 25px; display: flex; gap: 15px;">
+        {% csrf_token %}
+        <a href="javascript:history.back()" class="btn btn-dark" style="flex: 1; padding: 12px; font-size: 16px;">Скасувати</a>
+        <button type="submit" class="btn btn-danger" style="flex: 1; padding: 12px; font-size: 16px;">Так, видалити</button>
+    </form>
+</div>
+{% endblock %}

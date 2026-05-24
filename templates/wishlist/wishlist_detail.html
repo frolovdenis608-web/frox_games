@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Список бажаного — FroxGameS{% endblock %}
+
+{% block content %}
+<div style="width: 100%; background: #222; padding: 30px; border-radius: 10px;">
+    <h2 style="margin-top: 0;">Ваш список бажаного</h2>
+    <hr style="border-color: #444; margin-bottom: 20px;">
+
+    <div class="catalog" style="margin-top: 20px;">
+        {% for game in wishlist.games.all %}
+            <div class="game-card">
+                {% if game.cover_image %}
+                    <img src="{{ game.cover_image.url }}" alt="{{ game.title }}">
+                {% endif %}
+                <h4><a href="{% url 'games:game_detail' game.slug %}" style="color:white; text-decoration:none;">{{ game.title }}</a></h4>
+                <p>{{ game.price }} грн.</p>
+                <div style="display: flex; flex-direction: column; gap: 10px; margin-top: auto;">
+                    <a href="{% url 'orders:cart_add' game.id %}" class="btn btn-primary">У кошик</a>
+                    <a href="{% url 'wishlist:toggle_wishlist' game.id %}" class="btn btn-danger">Видалити з бажаного</a>
+                </div>
+            </div>
+        {% empty %}
+            <div style="grid-column: 1 / -1; padding: 40px; text-align: center;">
+                <p style="color: #aaa; font-size: 18px;">Ваш список бажаного порожній.</p>
+                <a href="{% url 'games:game_list' %}" class="btn btn-primary" style="margin-top: 15px;">Перейти до каталогу</a>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

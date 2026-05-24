@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Реєстрація — FroxGameS{% endblock %}
+
+{% block content %}
+<div style="background: #222; margin: 5% auto; padding: 30px; width: 450px; border-radius: 10px; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
+    <h2 style="text-align: center; margin-bottom: 20px;">Створення аккаунту</h2>
+    
+    <form method="POST" action="{% url 'users:register' %}">
+        {% csrf_token %}
+        
+        {% if form.errors %}
+            <div style="color: #dc3545; background: rgba(220, 53, 69, 0.1); padding: 10px; border-radius: 4px; font-size: 14px; margin-bottom: 15px;">
+                Будь ласка, виправте помилки нижче.
+            </div>
+        {% endif %}
+
+        {% for field in form %}
+            <div style="margin-bottom: 15px;">
+                <label for="{{ field.id_for_label }}" style="display:block; margin-bottom: 5px; color: #aaa;">{{ field.label }}:</label>
+                <input type="{{ field.field.widget.input_type|default:'text' }}" 
+                       name="{{ field.html_name }}" 
+                       id="{{ field.id_for_label }}" 
+                       required 
+                       style="width: 100%; box-sizing: border-box; background: #333; color: white; border: 1px solid #444; padding: 10px; border-radius: 4px;">
+                {% if field.help_text %}
+                    <small style="display: block; color: #777; font-size: 11px; mt: 5px;">{{ field.help_text }}</small>
+                {% endif %}
+                {% for error in field.errors %}
+                    <span style="color: #dc3545; font-size: 12px;">{{ error }}</span>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        <button type="submit" class="btn btn-success" style="width: 100%; padding: 12px; font-size: 16px; margin-top: 10px;">Зареєструватись</button>
+    </form>
+    
+    <p style="text-align: center; margin-top: 15px; font-size: 14px; color: #aaa;">
+        Вже є аккаунт? <a href="{% url 'users:login' %}" style="color: #007bff; text-decoration: none;">Увійти</a>
+    </p>
+</div>
+{% endblock %}

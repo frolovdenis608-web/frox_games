@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Ваш кошик — FroxGameS{% endblock %}
+
+{% block content %}
+<div style="background: #222; padding: 30px; width: 100%; border-radius: 10px; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.3); margin-top: 20px;">
+    <h2>Ваш кошик</h2>
+    <hr style="border-color: #444; margin-bottom: 20px;">
+
+    {% if messages %}
+        {% for message in messages %}
+            <div style="padding: 12px; margin-bottom: 20px; border-radius: 4px; background: {% if message.tags == 'success' %}rgba(40, 167, 69, 0.2){% else %}rgba(220, 53, 69, 0.2){% endif %}; color: {% if message.tags == 'success' %}#28a745{% else %}#dc3545{% endif %}; border: 1px solid {% if message.tags == 'success' %}#28a745{% else %}#dc3545{% endif %};">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if cart_items %}
+        <div id="cartItemsList">
+            {% for item in cart_items %}
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #444; padding: 15px 0;">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        {% if item.game.cover_image %}
+                            <img src="{{ item.game.cover_image.url }}" alt="{{ item.game.title }}" style="width: 60px; height: 80px; object-fit: cover; border-radius: 4px;">
+                        {% endif %}
+                        <div>
+                            <h4 style="margin: 0; font-size: 18px;">{{ item.game.title }}</h4>
+                            <small style="color: #888;">Жанр: {% for genre in item.game.genres.all %}{{ genre.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</small>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 20px;">
+                        <span style="font-size: 18px; font-weight: bold;">{{ item.price }} грн.</span>
+                        <a href="{% url 'orders:cart_remove' item.game.id %}" class="btn btn-danger" style="padding: 5px 10px; border-radius: 4px;">Видалити</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div style="margin-top: 30px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px;">
+            <form method="POST" action="{% url 'discounts:apply_promocode' %}" style="display: flex; gap: 10px; background: #333; padding: 15px; border-radius: 6px;">
+                {% csrf_token %}
+                <input type="text" name="code" placeholder="Введіть промокод" required style="background: #222; color: white; border: 1px solid #555; padding: 8px; border-radius: 4px;">
+                <button type="submit" class="btn btn-primary">Застосувати</button>
+            </form>
+
+            <div style="text-align: right; min-width: 250px;">
+                {% if discount > 0 %}
+                    <p style="color: #28a745; margin: 0 0 5px 0;">Застосовано знижку: {{ discount }}%</p>
+                {% endif %}
+                <p style="font-size: 22px; margin: 0 0 20px 0;">Разом: <span style="color: #28a745; font-weight: bold;">{{ total_price }}</span> грн.</p>
+                
+                {% if user.is_authenticated %}
+                    <a href="{% url 'orders:order_create' %}" class="btn btn-success" style="padding: 12px 25px; font-size: 18px; width: 100%; box-sizing: border-box; text-align: center;">Оформити замовлення</a>
+                {% else %}
+                    <a href="{% url 'users:login' %}" class="btn btn-primary" style="padding: 12px 25px; font-size: 16px; width: 100%; box-sizing: border-box; text-align: center;">Увійдіть, щоб замовити</a>
+                {% endif %}
+            </div>
+        </div>
+
+    {% else %}
+        <div style="text-align: center; padding: 40px 0;">
+            <h3>Ваш кошик порожній</h3>
+            <p style="color: #888;">Перейдіть до каталогу, щоб вибрати комп'ютерні ігри.</p>
+            <a href="{% url 'games:game_list' %}" class="btn btn-primary" style="margin-top: 15px;">До каталогу</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
