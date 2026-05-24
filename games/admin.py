@@ -7,3 +7,8 @@ class GameAdmin(admin.ModelAdmin):
     list_filter = ('is_active', 'genres')
     search_fields = ('title', 'developer')
     prepopulated_fields = {'slug': ('title',)}
+
+@admin.register(Genre)
+class GenreAdmin(admin.ModelAdmin):
+    list_display = ('name', 'slug')
+    prepopulated_fields = {'slug': ('name',)}
